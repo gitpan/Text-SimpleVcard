@@ -1,0 +1,8 @@
+Changes
+MANIFEST
+Makefile.PL
+README
+lib/Text/SimpleVcard.pm
+t/00-load.t
+t/vcard.t
+META.yml                                 Module meta-data (added by MakeMaker)
