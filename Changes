@@ -4,4 +4,8 @@ Revision history for Text-SimpleVcard
         First version, released on an unsuspecting world.
 0.02    06.02.2008/00:50
         Minor changes in pod-documentation and testsuit
+0.03    21.02.2008/13:00
+        Minor changes, deleting junk from development, changing
+	'our $VERSION' to 'my $VERSION' for perl < 5.6.0, eleminating
+	error in 'getSimpleValue' with array-index too large
 

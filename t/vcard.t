@@ -22,6 +22,8 @@ my $vCard = Text::SimpleVcard->new( $dat);
 my $fullname = $vCard->getFullName();
 my $propFN = $vCard->getSimpleValue( 'FN');
 my $propEmail = $vCard->getSimpleValue( 'EmaiL');
+my $undef1 = $vCard->getSimpleValue( 'dummy');
+my $undef2 = $vCard->getSimpleValue( 'FN', 27);
 my %h1 = $vCard->getValuesAsHash( 'TEL', [qw( WORK HOME VOICE FAX)]);
 my %h2 = $vCard->getValuesAsHash( 'TEL');
 my @dat1 = split( /[\r\n]+/, $dat);
@@ -37,6 +39,8 @@ is( keys %$vCard, 11,                   'new() returning correct count of proper
 is( $fullname, 'Tomuschat, Michael',    'getFullName() returning correct fullname');
 is( $propFN, 'Tomuschat\, Michael',     'getSimpleValue() returning correct FN-property');
 is( $propEmail, 'a.bcd@web.de',         'getSimpleValue() with upper/lower spelling');
+is( $undef1, undef,                     'getSimpleValue() with unknown element');
+is( $undef2, undef,                     'getSimpleValue() with index too big');
 is( keys %h1, 3,                        'getValuesAsHash() returning correct count of properties');
 is( $h1{ '(04711) 123457'}, 'WORK,FAX', 'getValuesAsHash() returning correct types');
 is( $h1{ '(04711) 123456'}, 'WORK',     'getValuesAsHash() returning correct types');

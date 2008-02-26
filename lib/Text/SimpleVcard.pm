@@ -13,7 +13,6 @@ my @telTypes = qw( PREF WORK HOME VOICE FAX MSG CELL PAGER BBS MODEM CAR ISDN VI
 # ---------------------------------------------------------------------------
 sub isIn {
    my $val = shift;
-   my $x = scalar grep( /^$val$/, @_);
    return( scalar grep( /^$val$/, @_) > 0);
 }
 
@@ -54,6 +53,7 @@ sub sprint {
    my( $class) = @_;
    my $res = "$class->{ name}";
 
+   print "Hugo 1: res=$res\n";
    foreach( @{ $class->{ types}}) {
       $res .= ";TYPE=$_";
    }
@@ -62,6 +62,7 @@ sub sprint {
       $res .= ";$_" . ( defined( $val) ? "=$val" : "");
    }
    $res .= ":$class->{ val}";
+   print "Hugo 2: res=$res\n";
    return $res;
 }
 
@@ -85,11 +86,11 @@ Text::SimpleVcard - a package to manage a single vCard
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 SYNOPSIS
 
@@ -193,7 +194,9 @@ sub getSimpleValue {
    my( $class, $prop, $ndx) = @_;
 
    $ndx = 0 if( !defined ( $ndx));
-   return ${ @{ $class->{ uc( $prop)}}}[ $ndx]->{ val};
+   my $aryRef = $class->{ uc( $prop)} or return undef;
+   my $valRef = ${ @$aryRef}[ $ndx] or return undef;
+   return $valRef->{ val};
 }
 
 =head2 getFullName()
