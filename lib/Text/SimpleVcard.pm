@@ -53,7 +53,6 @@ sub sprint {
    my( $class) = @_;
    my $res = "$class->{ name}";
 
-   print "Hugo 1: res=$res\n";
    foreach( @{ $class->{ types}}) {
       $res .= ";TYPE=$_";
    }
@@ -62,7 +61,6 @@ sub sprint {
       $res .= ";$_" . ( defined( $val) ? "=$val" : "");
    }
    $res .= ":$class->{ val}";
-   print "Hugo 2: res=$res\n";
    return $res;
 }
 
@@ -86,11 +84,11 @@ Text::SimpleVcard - a package to manage a single vCard
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 SYNOPSIS
 
@@ -134,9 +132,9 @@ sub new {
 
    $data =~ s/[\r\n]+ +//gm;            # lines starting with space belong to last line (unfolding)
    my @data = split( /[\r\n]+/, $data);
-   my( $fl, $ll) = ( shift( @data), pop( @data));
+   my( $fl, $ll) = ( shift( @data), pop( @data));	# chop enclosing BEGIN-, END-lines
 
-   if( $fl ne "BEGIN:VCARD" and $ll ne "END:VCARD") {
+   if( $fl ne "BEGIN:VCARD" and $ll ne "END:VCARD") {	# check if they are syntactically correct
       warn "vcard should begin with VCARD:BEGIN and end with VCARD:END";
       return;
    }
@@ -186,17 +184,22 @@ sub print {
    $vCard->getSimpleValue( $prop, $n);
 
 The method will fetch the first (or, if an index is provided, the n'th) value
-of the specified property.
+of the specified property. If the property or the index doesn't exist, it returns
+undef
 
 =cut
 
 sub getSimpleValue {
-   my( $class, $prop, $ndx) = @_;
+   my( $class, $prop, $ndx) = ( @_, 0);		# setting ndx=0 if not provided
 
-   $ndx = 0 if( !defined ( $ndx));
-   my $aryRef = $class->{ uc( $prop)} or return undef;
-   my $valRef = ${ @$aryRef}[ $ndx] or return undef;
-   return $valRef->{ val};
+   my $aryRef = $class->{ uc( $prop)};
+   return undef if( ! defined( $aryRef));	# property-name does not exist
+
+   my @ary = @$aryRef;	# using aryRef directly works under perl 5.8 but not under 5.10
+   my $propRef = $ary[ $ndx];
+   return undef if( ! defined( $propRef));	# no index '$ndx' for the requested property
+
+   return $propRef->{ val};
 }
 
 =head2 getFullName()

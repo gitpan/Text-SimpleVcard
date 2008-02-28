@@ -5,7 +5,7 @@ Revision history for Text-SimpleVcard
 0.02    06.02.2008/00:50
         Minor changes in pod-documentation and testsuit
 0.03    21.02.2008/13:00
-        Minor changes, deleting junk from development, changing
-	'our $VERSION' to 'my $VERSION' for perl < 5.6.0, eleminating
+        Minor changes, deleting junk from development, eleminating
 	error in 'getSimpleValue' with array-index too large
+0.04    Get the module ready for perl 5.10
 
