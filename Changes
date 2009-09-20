@@ -8,4 +8,9 @@ Revision history for Text-SimpleVcard
         Minor changes, deleting junk from development, eleminating
 	error in 'getSimpleValue' with array-index too large
 0.04    Get the module ready for perl 5.10
-
+0.05    20.09.2009
+	new method 'getSimpleValueOfType()'
+	revision and bugfixing in 'Text::SimpleVproperty'
+	Tags can now be decoded as 'Quoted Printable' (tanks to 'jpierce@cpan.org'). Other formats
+       	        can be added on request
+        The keyword 'TYPE' is now case insensitive (thanks to 'Bill Stephenson <bills@perlhelp.com>')	

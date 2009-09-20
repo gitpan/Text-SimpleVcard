@@ -43,7 +43,7 @@ is( $propEmail, 'a.bcd@web.de',         'getSimpleValue() with upper/lower spell
 is( $propTEL, '(04711) 123457',         'getsimpleValue() with in-range-index');
 is( $undef1, undef,                     'getSimpleValue() with unknown element');
 is( $undef2, undef,                     'getSimpleValue() with index too big');
-is( keys %h1, 3,                        'getValuesAsHash() returning correct count of properties');
+is( scalar( keys %h1), 3,               'getValuesAsHash() returning correct count of properties');
 is( $h1{ '(04711) 123457'}, 'WORK,FAX', 'getValuesAsHash() returning correct types');
 is( $h1{ '(04711) 123456'}, 'WORK',     'getValuesAsHash() returning correct types');
 is( $h1{ '(04711) 12345'}, 'HOME',      'getValuesAsHash() returning correct types');

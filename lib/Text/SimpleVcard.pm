@@ -6,7 +6,7 @@ package Text::SimpleVproperty;
 use warnings;
 use strict;
 
-my @telTypes = qw( PREF WORK HOME VOICE FAX MSG CELL PAGER BBS MODEM CAR ISDN VIDEO);
+use MIME::QuotedPrint();
 
 # ---------------------------------------------------------------------------
 # Check if a value is element of an array
@@ -19,26 +19,34 @@ sub isIn {
 sub new {
    my( $class, $data) = @_;
    my $self = {};
+   my $enc = "";
 
    my ( $meta, $val) = ( $data =~ /(.*?):(.*)/);
    my @meta = split( /;/, $meta);
    $self->{ name} = uc( shift( @meta));
 
    foreach( @meta){
-      my( $key, $val) = split( /\s*=\s*/);
-
-      if( $self->{ name} eq 'TEL' and isIn( $key, @telTypes)) {
-	 $val = $key;
-	 $key = 'TYPE';
+      my( $key, $val) = ( "TYPE", $_);
+      
+      if( $val =~ /=/) {
+         ( $key, $val) = split( /\s*=\s*/);
+      }
+      if( $key eq "ENCODING") {
+	 $enc = $val;
+	 next;
       }
 
-      if( $key eq 'TYPE') {
+      if( $key =~ /TYPE/i) {
 	 push( @{$self->{ types}}, $val) if( !isIn( $val, @{$self->{ types}}));
       } else {
 	 ${ $self->{ param}}{ $key} = $val;
       }
    }
-   $self->{ val} = $val;
+   if( $enc eq "QUOTED-PRINTABLE") {
+      $self->{ val} = MIME::QuotedPrint::decode_qp( $val);
+   } else {
+      $self->{ val} = $val;
+   }
 
    bless( $self, $class);
 }
@@ -65,8 +73,9 @@ sub sprint {
 }
 
 sub print {
-   my( $class) = @_;
+   my( $class, $hdr) = @_;
 
+   print $hdr if( $hdr);
    print $class->sprint() . "\n";
 }
 
@@ -84,11 +93,11 @@ Text::SimpleVcard - a package to manage a single vCard
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 SYNOPSIS
 
@@ -99,7 +108,8 @@ Apple Address book, MS Outlook, Evolution, etc.) use and can export and import v
 This module offers only basic vcard features (folding, ...). Grouping, etc. is not yet
 supported. Further enhancements are always welcome.
 
-This module has no other dependencies, it should work with every installation.
+SimpleVcard has a minimum of dependencies (actually only 'MIME::QuotedPrint'), it
+should work with every installation.
 
    use Text::SimpleVcard;
 
@@ -121,7 +131,7 @@ This module has no other dependencies, it should work with every installation.
 
    my $vCard = simpleVcard->new( $dat);
 
-The method will create a C<simpleVcard>object from vcard data (e.g. from
+The method will create a C<simpleVcard> object from vcard data (e.g. from
 a vCard-File (see example above)). Nested vCards will be ignored.
 
 =cut
@@ -202,6 +212,24 @@ sub getSimpleValue {
    return $propRef->{ val};
 }
 
+=head2 getSimpleValueOfType()
+
+   $vCard->getSimpleValueOfType( $prop, [qw( WORK HOME)]]);
+   $vCard->getSimpleValueOfType( $prop, [qw( WORK HOME)]], $n);
+
+The method will fetch the first (or, if an index is provided, the n'th) value
+of the specified property of the desired type. If the property or the index doesn't exist,
+it returns undef
+
+=cut
+
+sub getSimpleValueOfType {
+   my( $class, $prop, $types, $ndx) = ( @_, 0);	# setting ndx=0 if not provided
+   my %h = $class->getValuesAsHash( $prop, $types);
+
+   return ( keys %h)[ $ndx];
+}
+
 =head2 getFullName()
 
    $vCard->getFullName();
@@ -214,7 +242,8 @@ any backslashes found in that value
 sub getFullName {
    my( $class) = @_;
 
-   ( my $fn = $class->getSimpleValue( 'FN')) =~ s/\\//g;
+   my $fn = $class->getSimpleValue( 'FN');
+   $fn =~ s/\\//g if( defined( $fn));
    return $fn;
 }
 
@@ -234,7 +263,6 @@ sub getValuesAsHash {
 
    foreach my $prop ( @{ $class->{ $props}}) {          # e.g all entries with name='TEL'
       my @types = $types ? @$types : @{ $prop->{ types}};# take all types, if none required
-
       foreach my $type ( @types) {			# loop over all requested types
 	 if( $prop->hasType( uc( $type))) {
 	    push( @{ $res{ $prop->{ val}}}, $type);     # push entry in val-part of 'res'
@@ -242,7 +270,7 @@ sub getValuesAsHash {
       }
    }
 
-   foreach ( keys %res) {                       # replace arrays with CSV-value (string)
+   foreach ( keys %res) {  	                        # replace arrays with CSV-value (string)
       my $str = "";
 
       foreach ( @{ $res{ $_}}) {
@@ -300,7 +328,7 @@ L<http://search.cpan.org/dist/Text-SimpleVcard>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2008 Michael Tomuschat, all rights reserved.
+Copyright 2008-2009 Michael Tomuschat, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
